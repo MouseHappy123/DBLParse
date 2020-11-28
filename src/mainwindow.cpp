@@ -19,16 +19,19 @@
 #include <QMimeData>
 
 #include "parser.h"
-#include "parsedialog.h"
 #include "util.h"
 #include "record.h"
 #include "finder.h"
 #include "webpage.h"
 #include "loader.h"
-#include "settingsdialog.h"
 #include "configmanager.h"
 #include "application.h"
-#include "downloaddialog.h"
+
+#include "widgets/statuslabel.h"
+#include "dialogs/parsedialog.h"
+#include "dialogs/settingsdialog.h"
+#include "dialogs/downloaddialog.h"
+#include "dialogs/statusdialog.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -52,6 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->webview->page(), &WebPage::request,
             m_finder, &Finder::handleRequest);
     load();
+    addStatusIcon();
 }
 
 MainWindow::~MainWindow()
@@ -139,6 +143,9 @@ void MainWindow::on_actionOpen_triggered()
 
 void MainWindow::on_actionStatus_triggered()
 {
+    StatusDialog dialog(this);
+    dialog.exec();
+    /*
     QMessageBox box(this);
     QString text;
     QString parserStatus = Util::parsed()
@@ -160,6 +167,7 @@ void MainWindow::on_actionStatus_triggered()
         box.setDefaultButton(QMessageBox::Cancel);
     }
     if (box.exec() == QMessageBox::Open) on_actionOpen_triggered();
+    */
 }
 
 void MainWindow::on_actionClearIndex_triggered()
@@ -167,6 +175,7 @@ void MainWindow::on_actionClearIndex_triggered()
     Util::clearIndexs();
     m_finder->clearIndex();
     statusBar()->showMessage(tr("Clear index file successful!"));
+    statusLabel->setNo();
 }
 
 void MainWindow::on_actionOpenIndexFolder_triggered()
@@ -198,6 +207,7 @@ void MainWindow::load()
     connect(loader, &Loader::loadDone,
             this, [this]() {
         statusBar()->showMessage(tr("Load finished."), 3000); 
+        statusLabel->setOk();
     });
     thread->start();
     QTimer::singleShot(0, loader, &Loader::run);
@@ -207,6 +217,7 @@ void MainWindow::load()
 void MainWindow::open(const QString &fileName)
 {
     App->config->setValue("lastOpenFileName", fileName);
+    App->config->setValue("lastDateTime", QDateTime::currentDateTime());
     // question when size greater than 64MiB
     if(QFile(fileName).size() > PROMOT_FILE_SIZE){
         QMessageBox box(this);
@@ -248,6 +259,14 @@ void MainWindow::onLanguageChanged(const QString &locale)
     translator->load("DBLParse_" + locale, ":/");
 }
 
+void MainWindow::addStatusIcon()
+{
+    statusLabel = new StatusLabel;
+    connect(statusLabel, &StatusLabel::clicked,
+            this, &MainWindow::on_actionStatus_triggered);
+    ui->statusbar->addPermanentWidget(statusLabel);
+}
+
 void MainWindow::on_actionAuthorStac_triggered()
 {
     static const int TOP_K = 100;
@@ -274,8 +293,6 @@ void MainWindow::on_actionAuthorStac_triggered()
     auto html = Util::readFile(":/web/authorStac.html");
     auto data = QJsonDocument(authorStacArray).toJson();
     
-    //     qDebug() << data;
-    
     html.replace("<!-- DATA_HOLDER -->", data);
     view->setHtml(html, QUrl("qrc:/web/"));
     view->show();
@@ -284,7 +301,7 @@ void MainWindow::on_actionAuthorStac_triggered()
 void MainWindow::on_actionViewLog_triggered()
 {
 #ifdef QT_NO_DEBUG
-    QDesktopServices::openUrl(QUrl::fromLocalFile("DBLParse.log"));
+    QDesktopServices::openUrl(QUrl::fromLocalFile(Util::getLogPath()));
 #endif
 }
 
@@ -393,8 +410,7 @@ void MainWindow::dropEvent(QDropEvent *e)
 void MainWindow::on_actionOpenDataFolder_triggered()
 {
     if (Util::parsed()) {
-        QString path = QFileInfo(Util::getXmlFileName()).path();
-        QDesktopServices::openUrl(QUrl::fromLocalFile(path));
+        Util::openFolder(Util::getXmlFileName());
     } else {
         auto box = new QMessageBox(this);
         box->setText(tr("Do not find data file."));
@@ -406,4 +422,19 @@ void MainWindow::on_actionDownloadData_triggered()
 {
     auto dialog = new DownloadDialog(this);
     dialog->show();
+}
+
+void MainWindow::on_actionChangeLog_triggered()
+{
+    Util::showMarkdown(tr(":/docs/changelog.md"), this);
+}
+
+void MainWindow::on_actionFeedback_triggered()
+{
+    QDesktopServices::openUrl(QUrl("https://github.com/tootal/DBLParse/issues"));
+}
+
+void MainWindow::on_actionDocumentation_triggered()
+{
+    Util::showMarkdown(tr(":/docs/README.md"), this);
 }

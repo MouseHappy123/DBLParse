@@ -1,4 +1,4 @@
-QT       += core gui webenginewidgets network
+QT       += core gui webenginewidgets network svg
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -20,7 +20,7 @@ QTQUICK_COMPILER_SKIPPED_RESOURCES += DBLParse.qrc
 
 # Version
 VERSION_MAJOR = 3
-VERSION_MINOR = 0
+VERSION_MINOR = 2
 VERSION_PATCH = 0
 win32 {
     VERSION_BUILD = $$system(git log --pretty=oneline | find /V \"\" /C)
@@ -31,6 +31,7 @@ win32 {
     VERSION = $${VERSION_MAJOR}.$${VERSION_MINOR}.$${VERSION_PATCH}
     DEFINES += VERSION_STR=\\\"$${VERSION}.$${VERSION_BUILD}\\\"
 }
+
 # Header Include
 INCLUDEPATH += $${PWD}/../bignumber
 INCLUDEPATH += $${PWD}/../pivoter
@@ -62,47 +63,55 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     application.cpp \
     configmanager.cpp \
-    downloaddialog.cpp \
+    dialogs/statusdialog.cpp \
+    dialogs/downloaddialog.cpp \
     finder.cpp \
     loader.cpp \
     main.cpp \
     mainwindow.cpp \
-    parsedialog.cpp \
+    networker.cpp \
+    dialogs/parsedialog.cpp \
     parser.cpp \
     record.cpp \
-    settingsdialog.cpp \
+    dialogs/settingsdialog.cpp \
     stemmer.cpp \
     util.cpp \
     webpage.cpp \
-    webview.cpp
+    webview.cpp \
+    widgets/statuslabel.cpp
 
 HEADERS += \
     application.h \
     configmanager.h \
-    downloaddialog.h \
+    dialogs/statusdialog.h \
+    dialogs/downloaddialog.h \
     finder.h \
     hash.h \
     loader.h \
     mainwindow.h \
-    parsedialog.h \
+    networker.h \
+    dialogs/parsedialog.h \
     parser.h \
     reader.h \
     record.h \
     saver.h \
-    settingsdialog.h \
+    dialogs/settingsdialog.h \
     stemmer.h \
     util.h \
     webpage.h \
-    webview.h
+    webview.h \
+    widgets/statuslabel.h
 
 TRANSLATIONS += \
-    translations/DBLParse_zh_CN.ts
+    DBLParse_zh_CN.ts
 
 FORMS += \
-    downloaddialog.ui \
+    dialogs/statusdialog.ui \
+    dialogs/downloaddialog.ui \
     mainwindow.ui \
-    parsedialog.ui \
-    settingsdialog.ui
+    dialogs/parsedialog.ui \
+    dialogs/settingsdialog.ui \
+    widgets/statuslabel.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -110,8 +119,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
-    DBLParse.qrc \
-    translations/translations.qrc \
-    web.qrc
+    DBLParse.qrc
 
-QTQUICK_COMPILER_SKIPPED_RESOURCES += web.qrc
+DISTFILES += \
+    resources/no.svg \
+    resources/ok.svg

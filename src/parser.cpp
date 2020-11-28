@@ -6,10 +6,8 @@
 #include <QDebug>
 #include <QMap>
 #include <QList>
-#include <QRegularExpression>
 #include <QThread>
 #include <QEvent>
-#include <QScopedArrayPointer>
 
 #include <set>
 
@@ -19,24 +17,22 @@
 #include "hash.h"
 #include "saver.h"
 #include "stemmer.h"
+#include "application.h"
+#include "configmanager.h"
 
 Parser::Parser(QObject *parent)
     :QObject(parent)
 {
-//    qDebug("Parser construct");
-//    qDebug("Parser construct thread: %d", QThread::currentThreadId());
     totalAuthor = 0;
     yearWords.resize(MAX_YEAR - MIN_YEAR + 1);
 }
 
 Parser::~Parser()
 {
-//    qDebug("Parser destruct");
 }
 
 void Parser::run()
 {
-//    qDebug("Parser run thread: %d", QThread::currentThreadId());
     timing.start();
     elapsedTime = 0;
     
@@ -53,7 +49,7 @@ void Parser::run()
     saveAuthors();
     
     timeMark("Authors information saved.");
-    
+    App->config->setValue("costMsecs", costMsecs);
     qInfo() << QString("Parse done. Cost: %1 ms").arg(costMsecs);
     emit stateChanged(100);
     emit done();
@@ -61,9 +57,6 @@ void Parser::run()
 
 bool Parser::event(QEvent *event)
 {
-//    if (event->type() == QEvent::DeferredDelete) {
-//        qDebug("Parser deferred delete event");
-//    }
     return QObject::event(event);
 }
 
@@ -125,6 +118,8 @@ void Parser::parse()
         ++records;
     }
     emit stateChanged(50);
+    App->config->setValue("articleCount", records);
+    App->config->setValue("authorCount", authorInfos.size());
     qInfo() << "Authors: " << authorInfos.size();
     qInfo() << "Records: " << records;
     QVector<AuthorStac> authorStacs(authorInfos.size());
@@ -207,7 +202,6 @@ void Parser::countWordPerYear()
 void Parser::saveAuthors()
 {
     int n = totalAuthor;
-    qInfo() << "(Graph) number of nodes:" << n; 
     for (auto &i : G) {
         std::sort(i.begin(), i.end());
         i.erase(std::unique(i.begin(), i.end()), i.end());

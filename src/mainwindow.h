@@ -9,6 +9,7 @@ class Finder;
 class Loader;
 class Calculator;
 class QTranslator;
+class StatusLabel;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -56,6 +57,12 @@ private slots:
     
     void on_actionDownloadData_triggered();
     
+    void on_actionChangeLog_triggered();
+    
+    void on_actionFeedback_triggered();
+    
+    void on_actionDocumentation_triggered();
+    
 protected:
     void changeEvent(QEvent *e) override;
     void dragEnterEvent(QDragEnterEvent *e) override;
@@ -65,8 +72,10 @@ private:
     Ui::MainWindow *ui;
     QTranslator *translator;
     Finder *m_finder;
+    StatusLabel *statusLabel;
     
     void load();
     void open(const QString &fileName);
     void onLanguageChanged(const QString &locale);
+    void addStatusIcon();
 };

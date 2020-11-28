@@ -2,12 +2,21 @@
 
 #include <QSettings>
 #include <QStandardPaths>
+#include <QCoreApplication>
 
 #include "util.h"
 
 ConfigManager::ConfigManager(QObject *parent) : QObject(parent)
 {
+#if defined (Q_OS_WIN64)
     settings = new QSettings("DBLParse.ini" ,QSettings::IniFormat, this);
+#else
+    settings = new QSettings(QSettings::IniFormat, 
+                             QSettings::UserScope, 
+                             QCoreApplication::organizationName(),
+                             QCoreApplication::applicationName(),
+                             this);
+#endif
     init();
 }
 
@@ -36,4 +45,9 @@ void ConfigManager::setDefault(const QString &key, const QVariant &value)
 bool ConfigManager::contains(const QString &key) const
 {
     return settings->contains(key);
+}
+
+QString ConfigManager::path() const
+{
+    return settings->fileName();
 }

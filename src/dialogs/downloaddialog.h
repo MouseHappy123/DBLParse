@@ -6,6 +6,12 @@ namespace Ui {
 class DownloadDialog;
 }
 
+struct DblpRelease {
+    QString fileName;
+    QString lastModified;
+    QString size;
+};
+
 class DownloadDialog : public QDialog
 {
     Q_OBJECT
@@ -15,11 +21,12 @@ public:
     ~DownloadDialog();
     
 private slots:
-    void on_yesButton_clicked();
-    
-    void on_noButton_clicked();
+    void on_pushButton_clicked();
     
 private:
     Ui::DownloadDialog *ui;
+    static const QStringList tableLables;
+    void initDownloadSources();
+    void getDownloadList(const QString &source);
 };
 

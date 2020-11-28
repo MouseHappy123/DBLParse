@@ -86,7 +86,6 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
 在Release模式下构建，将构建好的exe文件复制到一个单独的文件夹中。
 在`Qt 5.14.2 (MSVC 2017 64-bit)`命令行工具下进入该文件夹，执行命令`windeployqt DBLParse.exe`，即可。
 
-
 ## 参考资料
 
 * [DBLP官网](https://dblp.org/)

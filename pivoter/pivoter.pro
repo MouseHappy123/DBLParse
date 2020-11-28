@@ -1,11 +1,11 @@
 # https://bitbucket.org/sjain12/pivoter
 
-CONFIG -= qt
+QT       += core
 
 TEMPLATE = lib
 CONFIG += staticlib
 CONFIG += warn_off
-CONFIG += c++11
+CONFIG += c++17
 CONFIG -= debug_and_release
 INCLUDEPATH += $${PWD}/../bignumber
 
